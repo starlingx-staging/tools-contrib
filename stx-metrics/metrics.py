@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+__author__      = "Victor Rodriguez"
+
 import subprocess
 import argparse
 

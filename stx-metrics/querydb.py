@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+__author__      = "Mario Carrillo"
+
 import random
 import time
 
