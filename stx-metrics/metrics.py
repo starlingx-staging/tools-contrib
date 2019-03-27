@@ -4,6 +4,7 @@ __author__      = "Victor Rodriguez"
 
 import subprocess
 import argparse
+from time import sleep
 
 def get_time(space):
     proc = subprocess.Popen(['systemd-analyze','time'],stdout=subprocess.PIPE)
@@ -55,6 +56,29 @@ def memory_footprint(memory_kind):
             break
     return mem_total,mem_used
 
+def get_cpu_utilization(seconds):
+    delay = 5
+    loop = 0
+    loops = seconds / delay
+    last_idle = last_total = 0
+    total_util = 0.0
+    while True:
+        with open('/proc/stat') as f:
+            fields = [float(column) for column in f.readline().strip().split()[1:]]
+        idle, total = fields[3], sum(fields)
+        idle_delta, total_delta = idle - last_idle, total - last_total
+        last_idle, last_total = idle, total
+        utilisation = 100.0 * (1.0 - idle_delta / total_delta)
+        print('%5.1f%%' % utilisation)
+        total_util += utilisation
+        sleep(delay)
+        loop = loop +1
+        if loop >= loops:
+            break
+    if loops:
+        average = (total_util/loops)
+    return average
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -66,6 +90,9 @@ def main():
         action='store_true')
     parser.add_argument('--memory_footprint',\
         help='Print virtual memory footprint',\
+        action='store_true')
+    parser.add_argument('--cpu_utilization',\
+        help='Print cpu utilization',\
         action='store_true')
     args = parser.parse_args()
 
@@ -91,6 +118,9 @@ def main():
         print ("    total = " + mem_total)
         print ("    used = " + mem_used)
 
+    if args.cpu_utilization:
+        average = get_cpu_utilization(30)
+        print ("Average CPU utilization = %5.1f%%" % average)
 
 if __name__ == "__main__":
     main()
