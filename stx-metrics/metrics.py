@@ -17,6 +17,26 @@ def get_time(space):
       else:
         break
 
+def get_hd_footprint():
+    proc = subprocess.Popen(['df','-h'],stdout=subprocess.PIPE)
+    while True:
+        line = proc.stdout.readline()
+        if line != '':
+            if "/" in line:
+              line_array = (line.rstrip().split())
+              for element in line_array:
+                if "/" == line_array[len(line_array)-1]:
+                    sda = (line)
+                    break
+        else:
+            break
+
+    if sda:
+        total_hd = (sda.split()[1])
+        used_hd = (sda.split()[2])
+        avail_hd = (sda.split()[3])
+        per_hd = (sda.split()[4])
+        return total_hd,used_hd,avail_hd,per_hd
 
 def main():
 
@@ -24,11 +44,22 @@ def main():
     parser.add_argument('--boottime',\
         help='Print kernel/userspace boot time',\
         action='store_true')
+    parser.add_argument('--hd_footprint',\
+        help='Print HD footprint',\
+        action='store_true')
+
     args = parser.parse_args()
 
     if args.boottime:
         print ("kernel space time = " + get_time("kernel"))
         print ("user space time = " + get_time("userspace"))
+
+    if args.hd_footprint:
+        total_hd,used_hd,avail_hd,per_hd = get_hd_footprint()
+        print("total_hd = " +  total_hd)
+        print("used_hd = " + used_hd)
+        print("avail_hd = " + avail_hd)
+        print("per_hd = " + per_hd)
 
 if __name__ == "__main__":
     main()
