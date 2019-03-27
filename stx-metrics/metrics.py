@@ -92,8 +92,7 @@ def main():
         help='Print virtual memory footprint',\
         action='store_true')
     parser.add_argument('--cpu_utilization',\
-        help='Print cpu utilization',\
-        action='store_true')
+        help='Print cpu utilization over X seconds')
     args = parser.parse_args()
 
     if args.boottime:
@@ -119,7 +118,12 @@ def main():
         print ("    used = " + mem_used)
 
     if args.cpu_utilization:
-        average = get_cpu_utilization(30)
+        if args.cpu_utilization <= 0:
+            time = 120
+        else:
+            time = args.cpu_utilization
+
+        average = get_cpu_utilization(int(time))
         print ("Average CPU utilization = %5.1f%%" % average)
 
 if __name__ == "__main__":
