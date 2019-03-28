@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__      = "Victor Rodriguez"
 
 import subprocess
 import argparse
 from time import sleep
+import os.path
 
 def get_time(space):
     proc = subprocess.Popen(['systemd-analyze','time'],stdout=subprocess.PIPE)
@@ -79,6 +81,53 @@ def get_cpu_utilization(seconds):
         average = (total_util/loops)
     return average
 
+def print_hd_footprint():
+    total_hd,used_hd,avail_hd,per_hd = get_hd_footprint()
+    print("\n===================================")
+    print("Hard Drive Footprint")
+    print("===================================\n")
+    print("total_hd = " +  total_hd)
+    print("used_hd = " + used_hd)
+    print("avail_hd = " + avail_hd)
+    print("per_hd = " + per_hd)
+
+def print_boottime():
+    print("\n===================================")
+    print("System Boottime")
+    print("===================================\n")
+    print ("kernel space boot time = " + get_time("kernel"))
+    print ("user space boot time = " + get_time("userspace"))
+
+def print_memory_footprint():
+    mem_total,mem_used = memory_footprint("Mem")
+    print("\n===================================")
+    print(" Virtual Memory Footprint")
+    print("===================================\n")
+    print ("\nMemory\n")
+    print ("    total = " + mem_total)
+    print ("    used = " + mem_used)
+
+    mem_total,mem_used = memory_footprint("Swap")
+    print ("\nSwap memory\n")
+    print ("    total = " + mem_total)
+    print ("    used = " + mem_used)
+
+def print_cpu_utilization(time):
+    print("\n===================================")
+    print(" CPU utilization")
+    print("===================================\n")
+    average = get_cpu_utilization(int(time))
+    print ("Average CPU utilization = %5.1f%%" % average)
+
+def print_host_data():
+    print("\n===================================")
+    print(" HOST INFO")
+    print("===================================\n")
+    filename = '/etc/lsb-release'
+    if os.path.isfile(filename):
+        FILE = open(filename,"r")
+        print (FILE.read())
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -95,36 +144,30 @@ def main():
         help='Print cpu utilization over X seconds')
     args = parser.parse_args()
 
+    print_host_data()
+    time = 120
+
     if args.boottime:
-        print ("kernel space time = " + get_time("kernel"))
-        print ("user space time = " + get_time("userspace"))
+        print_boottime()
 
-    if args.hd_footprint:
-        total_hd,used_hd,avail_hd,per_hd = get_hd_footprint()
-        print("total_hd = " +  total_hd)
-        print("used_hd = " + used_hd)
-        print("avail_hd = " + avail_hd)
-        print("per_hd = " + per_hd)
+    elif args.hd_footprint:
+        print_hd_footprint()
 
-    if args.memory_footprint:
-        mem_total,mem_used = memory_footprint("Mem")
-        print ("\nMemory\n")
-        print ("    total = " + mem_total)
-        print ("    used = " + mem_used)
+    elif args.memory_footprint:
+        print_memory_footprint()
 
-        mem_total,mem_used = memory_footprint("Swap")
-        print ("\nSwap memory\n")
-        print ("    total = " + mem_total)
-        print ("    used = " + mem_used)
-
-    if args.cpu_utilization:
+    elif args.cpu_utilization:
         if args.cpu_utilization <= 0:
             time = 120
         else:
             time = args.cpu_utilization
+        print_cpu_utilization(time)
 
-        average = get_cpu_utilization(int(time))
-        print ("Average CPU utilization = %5.1f%%" % average)
+    else:
+        print_boottime()
+        print_hd_footprint()
+        print_memory_footprint()
+        print_cpu_utilization(time)
 
 if __name__ == "__main__":
     main()
