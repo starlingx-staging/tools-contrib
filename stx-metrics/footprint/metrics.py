@@ -7,6 +7,9 @@ import subprocess
 import argparse
 from time import sleep
 import os.path
+import json
+
+data = {}
 
 def get_time(space):
     proc = subprocess.Popen(['systemd-analyze','time'],stdout=subprocess.PIPE)
@@ -91,12 +94,30 @@ def print_hd_footprint():
     print("avail_hd = " + avail_hd)
     print("per_hd = " + per_hd)
 
+    data['hd_footprint'] = []
+    data['hd_footprint'].append({
+        'total_hd': total_hd,
+        'used_hd': used_hd,
+        'avail_hd': avail_hd,
+        'per_hd':per_hd
+    })
+
 def print_boottime():
+
+    kernel_time = get_time("kernel")
+    userspace_time = get_time("userspace")
+
     print("\n===================================")
     print("System Boottime")
     print("===================================\n")
-    print ("kernel space boot time = " + get_time("kernel"))
-    print ("user space boot time = " + get_time("userspace"))
+    print ("kernel space boot time = " + kernel_time)
+    print ("user space boot time = " + userspace_time)
+
+    data['boot_time'] = []
+    data['boot_time'].append({
+        'kernel_space': kernel_time,
+        'user_space': userspace_time
+    })
 
 def print_memory_footprint():
     mem_total,mem_used = memory_footprint("Mem")
@@ -107,10 +128,22 @@ def print_memory_footprint():
     print ("    total = " + mem_total)
     print ("    used = " + mem_used)
 
+    data['memory'] = []
+    data['memory'].append({
+        'memory_total': mem_total,
+        'memory_used': mem_used
+    })
+
     mem_total,mem_used = memory_footprint("Swap")
     print ("\nSwap memory\n")
     print ("    total = " + mem_total)
     print ("    used = " + mem_used)
+
+    data['swap_memory'] = []
+    data['swap_memory'].append({
+        'memory_total': mem_total,
+        'memory_used': mem_used
+    })
 
 def print_cpu_utilization(time):
     print("\n===================================")
@@ -118,6 +151,11 @@ def print_cpu_utilization(time):
     print("===================================\n")
     average = get_cpu_utilization(int(time))
     print ("Average CPU utilization = %5.1f%%" % average)
+
+    data['cpu'] = []
+    data['cpu'].append({
+        'cpu utilization': average
+    })
 
 def print_host_data():
     print("\n===================================")
@@ -127,6 +165,11 @@ def print_host_data():
     if os.path.isfile(filename):
         FILE = open(filename,"r")
         print (FILE.read())
+
+def generate_json(data):
+
+    with open('data.json', 'w') as outfile:
+        json.dump(data, outfile)
 
 def main():
 
@@ -168,6 +211,8 @@ def main():
         print_hd_footprint()
         print_memory_footprint()
         print_cpu_utilization(time)
+
+    generate_json(data)
 
 if __name__ == "__main__":
     main()
