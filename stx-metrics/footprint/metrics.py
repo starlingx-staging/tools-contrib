@@ -3,6 +3,7 @@
 
 __author__      = "Victor Rodriguez"
 
+import statistics
 import subprocess
 import argparse
 from time import sleep
@@ -67,6 +68,8 @@ def get_cpu_utilization(seconds):
     loops = seconds / delay
     last_idle = last_total = 0
     total_util = 0.0
+    list_data = []
+
     while True:
         with open('/proc/stat') as f:
             fields = [float(column) for column in f.readline().strip().split()[1:]]
@@ -76,13 +79,16 @@ def get_cpu_utilization(seconds):
         utilisation = 100.0 * (1.0 - idle_delta / total_delta)
         print('%5.1f%%' % utilisation)
         total_util += utilisation
+        list_data.append(utilisation)
         sleep(delay)
         loop = loop +1
         if loop >= loops:
             break
     if loops:
         average = (total_util/loops)
-    return average
+    stdev_result = (statistics.stdev(list_data))
+
+    return average,stdev_result
 
 def print_hd_footprint():
     total_hd,used_hd,avail_hd,per_hd = get_hd_footprint()
@@ -149,12 +155,14 @@ def print_cpu_utilization(time):
     print("\n===================================")
     print(" CPU utilization")
     print("===================================\n")
-    average = get_cpu_utilization(int(time))
+    average,stdev_result = get_cpu_utilization(int(time))
     print ("Average CPU utilization = %5.1f%%" % average)
+    print ("Standard Deviation = %5.1f%%" % stdev_result)
 
     data['cpu'] = []
     data['cpu'].append({
-        'cpu utilization': average
+        'cpu_utilization': average,
+        'stdev':stdev_result
     })
 
 def print_host_data():
