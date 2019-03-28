@@ -1,8 +1,37 @@
-# metrics tests
+# metrics
 
-This project a short guide to inject metrics results in a [InfluxDB] database,
-this is in order to be plotted by [Grafana] project and track different relevant
-performance metrics of [StarlingX] project.
+This project add the capability to measure 4 basic footprint parts:
+
+	* boot time
+	* hard drive footprint
+	* virtual memory footprint
+	* Average CPU % utilzation
+
+## How to run it:
+
+```
+	python metrics.py
+```
+
+or:
+
+```
+usage: metrics.py [-h] [--boottime] [--hd_footprint] [--memory_footprint]
+                  [--cpu_utilization CPU_UTILIZATION]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --boottime            Print kernel/userspace boot time
+  --hd_footprint        Print HD footprint
+  --memory_footprint    Print virtual memory footprint
+  --cpu_utilization CPU_UTILIZATION
+                        Print cpu utilization over X seconds
+```
+## FluxDB DB injection
+
+This project also has a short guide to inject metrics results in a [InfluxDB]
+database, this is in order to be plotted by [Grafana] project and track
+different relevant performance metrics of [StarlingX] project.
 
 **NOTE:**
 This basic script includes hard-code and this have to be just a **reference**
