@@ -1,0 +1,10 @@
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-ens6
+IPADDR=INIT_IP_TO_SET
+NETMASK=255.255.255.0
+BOOTPROTO=static
+DEVICE=ens6
+MTU=1500
+GATEWAY=10.10.10.1
+ONBOOT=yes
+EOF
+

@@ -1,0 +1,13 @@
+*.pyc
+*DeploymentTest*
+*.swp
+*.img
+*.iso
+*.rpm
+*.tgz
+*/host_add.sh
+isolinux
+libvirt/vms/
+test.sh
+testresult
+test_controller0_network.txt
