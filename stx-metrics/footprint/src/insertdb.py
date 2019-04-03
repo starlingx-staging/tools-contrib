@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-__author__      = "Mario Carrillo"
+__author__      = "Mario Carrillo/Victor Rodriguez"
 
 import random
 import time
 import argparse
+import json
+import os
+import logging
 
 from influxdb import InfluxDBClient
 
@@ -13,15 +16,16 @@ INFLUX_PORT = ""
 INFLUX_PASS = ""
 INFLUX_USER = ""
 
-def send_data(json_file):
-
-    client = InfluxDBClient(INFLUX_SERVER, INFLUX_PORT,
-                                INFLUX_USER, INFLUX_PASS, 'starlingx')
-    if client.write_points(json_file):
-        print("Data inserted successfully")
+def send_data(json_file,client):
+    if client:
+        if client.write_points(json_file):
+            logging.info("Data inserted successfully")
+            return True
+        else:
+            logging.error("Error during data insertion")
     else:
-        print("Error during data insertion")
-    return client
+        logging.warning("Error the server is not configured yet: server.conf")
+        return False
 
 def check_data(client,table):
 
@@ -30,33 +34,66 @@ def check_data(client,table):
     print("%s contains:" % table)
     print(result)
 
-def main():
+def check_db_status(db_name):
+    try:
+        dbclient = InfluxDBClient(INFLUX_SERVER,\
+                INFLUX_PORT,\
+                INFLUX_USER,\
+                INFLUX_PASS)
+        dblist = dbclient.get_list_database()
+        db_found = False
+        for db in dblist:
+            if db['name'] == db_name:
+                db_found = True
+        if not(db_found):
+            logging.info('Database <%s> not found, trying to create it', db_name)
+            dbclient.create_database(db_name)
+        return True
+    except Exception as e:
+        logging.error('Error querying open-nti database: %s', e)
+        return False
+
+
+def get_server_data():
 
     global INFLUX_SERVER
     global INFLUX_PORT
     global INFLUX_PASS
     global INFLUX_USER
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--server',\
-        help='addres of the influxdb server')
-    parser.add_argument('--port',\
-        help='port of the influxdb server')
-    parser.add_argument('--user',\
-        help='user of the influxdb server')
-    parser.add_argument('--password',\
-        help='password of the influxdb server')
+    config_file = "server.conf"
+    client = None
 
-    args = parser.parse_args()
+    if os.path.isfile(config_file):
+        FILE = open(config_file, "r")
+        for line in FILE:
+            if "#" in line:
+                pass
+            if "INFLUX_SERVER" in line:
+                INFLUX_SERVER = line.split("=")[1].strip()
+            if "INFLUX_PORT" in line:
+                INFLUX_PORT = line.split("=")[1].strip()
+            if "INFLUX_PASS" in line:
+                INFLUX_PASS = line.split("=")[1].strip()
+            if "INFLUX_USER" in line:
+                INFLUX_USER = line.split("=")[1].strip()
+            if "DB_NAME" in line:
+                DB_NAME = line.split("=")[1].strip()
+        if INFLUX_SERVER and INFLUX_PORT and INFLUX_PASS and INFLUX_USER:
+            if check_db_status(DB_NAME):
+                client = InfluxDBClient(INFLUX_SERVER, INFLUX_PORT,
+                                            INFLUX_USER, INFLUX_PASS,DB_NAME)
+    else:
+        logging.error("Error server.conf missing")
 
-    if args.server:
-        INFLUX_SERVER = args.server
-    if args.port:
-        INFLUX_PORT = args.port
-    if args.password:
-        INFLUX_PASS = args.password
-    if args.user:
-        INFLUX_USER = args.password
+    return client
+
+def main():
+    client = get_server_data()
+    print(INFLUX_SERVER)
+    print(INFLUX_PORT)
+    print(INFLUX_PASS)
+    print(INFLUX_USER)
 
     # Table information
     table = "vm_metrics"
@@ -77,10 +114,7 @@ def main():
         }
     ]
 
-    if INFLUX_SERVER and INFLUX_PORT and INFLUX_PASS and INFLUX_USER:
-        client = send_data(json_file)
-
-    check_data(client,table)
+    send_data(json_file,client)
 
 if __name__ == '__main__':
     main()
