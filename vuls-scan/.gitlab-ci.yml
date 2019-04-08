@@ -1,0 +1,104 @@
+variables:
+  ISO_URL: "http://mirror.starlingx.cengn.ca/mirror/starlingx/master/centos/latest_build/outputs/iso/bootimage.iso"
+  H_PROXY: "your_http_proxy:port"
+  HS_PROXY: "your_https_proxy:port"
+  VM_HOST: "your_vm_hostname_or_ip"
+
+stages:
+  - download_iso
+  - install_vm
+  - copy_ssh_key
+  - copy_resources
+  - setup_vuls_env
+  - install_dependencies
+  - install_vuls
+  - run_vuls
+  - copy_reports
+  - sendmail
+
+download_iso:
+  stage: download_iso
+  tags:
+    - vuls
+    - scan
+  script: today=`date +"%Y-%b-%d"`;
+          iso_date=`curl http://mirror.starlingx.cengn.ca/mirror/starlingx/master/centos/latest_build/outputs/iso/|grep bootimage.iso|sed 's/.*>\([0-9][0-9][0-9][0-9]\-[A-Z][a-z][a-z]\-[0-3][0-9]\).*/\1/'`;
+          echo "TODAY = $today";echo "ISO_DATE = $iso_date";
+          if [[ "$today" = "$iso_date" ]];then wget $ISO_URL; else exit 1;fi;
+          mv bootimage.iso ~/bootimage-`date +"%Y%m%d"`.iso
+
+install_vm:
+  stage: install_vm
+  tags:
+    - vuls
+    - scan
+  script: echo "place code to deploy a VM using the downloaded ISO in the previous stage"
+
+copy_ssh_key:
+  stage: copy_ssh_key
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          ssh-keygen -R ${VM_HOST};
+          /usr/bin/expect sendkeys.expect
+
+copy_resources:
+  stage: copy_resources
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;
+          scp -r -o StrictHostKeyChecking=no -i ./keys/temp ./resources/ wrsroot@${VM_HOST}:/home/wrsroot/;
+
+setup_vuls_env:
+  stage: setup_vuls_env
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} mv resources/* .;
+          /usr/bin/expect setupsudoers.expect;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} sudo -S mv /home/wrsroot/Centos-Base.repo /etc/yum.repos.d/;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} sudo -S ./setup_env.sh
+
+install_dependencies:
+  stage: install_dependencies
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} 'sudo -S yum -y install tmux --nogpgcheck';
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} 'tmux new-session -d -s install_packs "sudo yum -y install sqlite git make wget yum-utils gcc --nogpgcheck"';
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} 'while [ $? -eq 0 ];do tmux ls|grep install_packs;done' || echo 0
+
+install_vuls:
+  stage: install_vuls
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} ./vuls.sh
+
+run_vuls:
+  stage: run_vuls
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          ssh -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST} ./scan_report.sh
+
+copy_reports:
+  stage: copy_reports
+  tags:
+    - vuls
+    - scan
+  script: chmod 600 ./keys/temp;chmod 644 ./keys/temp.pub;
+          scp -o StrictHostKeyChecking=no -i ./keys/temp wrsroot@${VM_HOST}:/home/wrsroot/report* ${HOME}
+
+sendmail:
+  stage: sendmail
+  tags:
+    - vuls
+    - scan
+  script: cp resources/sendmail.sh . ;./sendmail.sh
