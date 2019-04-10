@@ -11,7 +11,7 @@ from subprocess import *
 from openstack_logcheck import *
 import ectest.log as LOG
 
-DEBUG = True
+DEBUG = False
 
 CurrPath = os.path.join(os.path.abspath(os.getcwd()))
 
