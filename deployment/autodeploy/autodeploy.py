@@ -868,7 +868,8 @@ if args.start <= 1:
         # Wait for controller0 installation
         wait_minutes(10)
         wait_for_node(15, dplmnt["controller0_ip"])
-        LOG.Info("# Finished ISO installation.")
+        wait_minutes(1)
+        LOG.Time("# Finished ISO installation")
 
         check_return(cmdexpect('scp -r %s %s@%s:~/'
                                 % (dplmnt['cc_config'],
