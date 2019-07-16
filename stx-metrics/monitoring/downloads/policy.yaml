@@ -1,0 +1,22 @@
+apiVersion: "crd.projectcalico.org/v1"
+kind: GlobalNetworkPolicy
+metadata:
+  name: prom-node-exporter
+spec:
+  selector: "has(iftype) && iftype == 'oam'"
+  order: 100
+  applyOnForward: false
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    ipVersion: 4
+    protocol: TCP
+    destination:
+      ports: [9100]
+  egress:
+  - action: Allow
+    ipVersion: 4
+    protocol: TCP
+
