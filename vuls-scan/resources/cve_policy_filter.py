@@ -96,7 +96,7 @@ def get_base_vector(cve_id,filename):
                     ac = element.split(":")[1]
                 if "Au:" in element:
                     au = element.split(":")[1]
-                if "I:" in element:
+                if "A:" in element:
                     ai = element.split(":")[1]
         return av,ac,au,ai
 
