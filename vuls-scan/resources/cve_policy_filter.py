@@ -15,16 +15,43 @@ Run this script as  python cve_policy_filter.py
 import os
 import sys
 
-def get_cvss_position(lines):
-        for line in lines:
-            line = line.strip()
-            if "CVE-ID" in line and "CVSS" in line:
-                elements = (line.split("|"))
-                count = 0
-                for element in elements:
-                    if "CVSS"  in element.strip():
-                        return count
-                    count +=1
+cves_report_full_file = "cves_report_full.txt"
+cves_report_list_file = "cves_report_list.txt"
+cves_report_old_list_file = "cves_report_old_list_file.txt"
+
+def get_new_cves(cve_ids,old_cve_ids):
+    new_cves = (list(set(cve_ids) - set(old_cve_ids)))
+    print("\nNew CVEs from last report:\n")
+    for cve_id in new_cves:
+        cve = {}
+        cvss = float(get_cvss(cve_id,cves_report_list_file))
+        av,ac,au,ai = get_base_vector(cve_id,cves_report_full_file)
+        cve_status = get_cves_status(cve_id,cves_report_list_file)
+        cve["id"] = cve_id
+        cve["cvss"] = cvss
+        cve["av"] = av
+        cve["ac"] = ac
+        cve["au"] = au
+        cve["ai"] = ai
+        cve["status"] = cve_status
+        print(cve)
+
+def get_position(token,lines):
+    """
+    Get the position to search for the token, like CVSS,  in some reports it is
+    in column 4th and in some others in 2nd column
+    :param lines of the file name cves_report_list.txt
+    :return return the CVSS position on the file
+    """
+    for line in lines:
+        line = line.strip()
+        if "CVE-ID" in line and "CVSS" in line:
+            elements = (line.split("|"))
+            count = 0
+            for element in elements:
+                if token in element.strip():
+                    return count
+                count +=1
 
 def get_cvss(cve_id,filename):
     """
@@ -38,13 +65,12 @@ def get_cvss(cve_id,filename):
     """
     with open(filename,'r') as fh:
         lines = fh.readlines()
-        pos = get_cvss_position(lines)
+        pos = get_position("CVSS",lines)
         for line in lines:
             line = line.strip()
             if "CVE" in line and not "CVE-ID" in line:
                 if cve_id in (line.split("|")[1]):
                     cvss = (line.split("|")[pos])
-                    print(cve_id + "    " + cvss)
                     return cvss
 
 def get_cves_status(cve_id,filename):
@@ -55,10 +81,11 @@ def get_cves_status(cve_id,filename):
     cve_ids = []
     with open(filename,'r') as fh:
         lines = fh.readlines()
+        pos = get_position("FIXED",lines)
         for line in lines:
             if "CVE" in line and not "CVE-ID" in line:
                 if cve_id in line:
-                    cve_status = line.strip().split("|")[2].strip()
+                    cve_status = line.strip().split("|")[pos].strip()
                     return cve_status
 
 def get_cves_id(filename):
@@ -118,8 +145,6 @@ if __name__ == '__main__':
 
     cves_valid = []
 
-    cves_report_full_file = "cves_report_full.txt"
-    cves_report_list_file = "cves_report_list.txt"
 
     if not os.path.isfile(cves_report_list_file) or \
     not os.path.isfile(cves_report_full_file):
@@ -128,6 +153,8 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     cve_ids = get_cves_id(cves_report_list_file)
+    old_cve_ids = get_cves_id(cves_report_old_list_file)
+    get_new_cves(cve_ids,old_cve_ids)
 
     for cve_id in cve_ids:
         cve = {}
