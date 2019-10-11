@@ -15,6 +15,17 @@ Run this script as  python cve_policy_filter.py
 import os
 import sys
 
+def get_cvss_position(lines):
+        for line in lines:
+            line = line.strip()
+            if "CVE-ID" in line and "CVSS" in line:
+                elements = (line.split("|"))
+                count = 0
+                for element in elements:
+                    if "CVSS"  in element.strip():
+                        return count
+                    count +=1
+
 def get_cvss(cve_id,filename):
     """
     Get the CVSS score of a CVE
@@ -27,10 +38,13 @@ def get_cvss(cve_id,filename):
     """
     with open(filename,'r') as fh:
         lines = fh.readlines()
+        pos = get_cvss_position(lines)
         for line in lines:
+            line = line.strip()
             if "CVE" in line and not "CVE-ID" in line:
-                if cve_id in (line.strip().split("|")[1]):
-                    cvss = (line.strip().split("|")[4])
+                if cve_id in (line.split("|")[1]):
+                    cvss = (line.split("|")[pos])
+                    print(cve_id + "    " + cvss)
                     return cvss
 
 def get_cves_status(cve_id,filename):
