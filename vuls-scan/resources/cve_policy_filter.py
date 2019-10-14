@@ -18,6 +18,7 @@ import sys
 cves_report_full_file = "cves_report_full.txt"
 cves_report_list_file = "cves_report_list.txt"
 cves_report_old_list_file = "cves_report_old_list_file.txt"
+cves_report_old_full_file = "cves_report_old_full_file.txt"
 
 def get_new_cves(cve_ids,old_cve_ids):
     new_cves = (list(set(cve_ids) - set(old_cve_ids)))
@@ -141,10 +142,42 @@ def get_base_vector(cve_id,filename):
                     ai = element.split(":")[1]
         return av,ac,au,ai
 
+
+def get_last_warning_cves():
+
+    cves_warning = []
+    cves_report_list_file = cves_report_old_list_file
+    cves_report_full_file = cves_report_old_full_file
+    cve_ids = get_cves_id(cves_report_list_file)
+    for cve_id in cve_ids:
+        cve = {}
+        cvss = float(get_cvss(cve_id,cves_report_list_file))
+        av,ac,au,ai = get_base_vector(cve_id,cves_report_full_file)
+        cve_status = get_cves_status(cve_id,cves_report_list_file)
+
+        cve["id"] = cve_id
+        cve["cvss"] = cvss
+        cve["av"] = av
+        cve["ac"] = ac
+        cve["au"] = au
+        cve["ai"] = ai
+        cve["status"] = cve_status
+
+        if  cvss >= 7.0 \
+        and av == "N" \
+        and ac == "L" \
+        and ("N" in au or "S" in au) \
+        and ("P" in ai or "C" in ai):
+            cves_warning.append(cve)
+
+    return cves_warning
+
+
 if __name__ == '__main__':
 
     cves_valid = []
-
+    cves_warning = []
+    cves_warning_old = []
 
     if not os.path.isfile(cves_report_list_file) or \
     not os.path.isfile(cves_report_full_file):
@@ -156,32 +189,47 @@ if __name__ == '__main__':
     old_cve_ids = get_cves_id(cves_report_old_list_file)
     get_new_cves(cve_ids,old_cve_ids)
 
+    cves_warning_old = get_last_warning_cves()
+    print("\nCVEs that we had to track from last report\n")
+    for cve in cves_warning_old:
+        cve_id = (cve["id"].strip())
+        cve_status = get_cves_status(cve_id,cves_report_list_file)
+        if cve_status == "fixed":
+            print(cve)
+
     for cve_id in cve_ids:
         cve = {}
 
         cvss = float(get_cvss(cve_id,cves_report_list_file))
         av,ac,au,ai = get_base_vector(cve_id,cves_report_full_file)
         cve_status = get_cves_status(cve_id,cves_report_list_file)
+
+        cve["id"] = cve_id
+        cve["cvss"] = cvss
+        cve["av"] = av
+        cve["ac"] = ac
+        cve["au"] = au
+        cve["ai"] = ai
+        cve["status"] = cve_status
+
         """
         Following rules from:
         https://wiki.openstack.org/wiki/StarlingX/Security/CVE_Support_Policy
         """
+        if  cvss >= 7.0 \
+        and av == "N" \
+        and ac == "L" \
+        and ("N" in au or "S" in au) \
+        and ("P" in ai or "C" in ai):
+            if cve_status == "fixed":
+                cves_valid.append(cve)
+            else:
+                cves_warning.append(cve)
 
-        if  cvss >= 7.0\
-        and av == "N"\
-        and ac == "L"\
-        and (au == "N" or au == "S")\
-        and (ai == "P" or ai == "C")\
-        and cve_status == "fixed":
-            cve["id"] = cve_id
-            cve["cvss"] = cvss
-            cve["av"] = av
-            cve["ac"] = ac
-            cve["au"] = au
-            cve["ai"] = ai
-            cve["status"] = cve_status
-            cves_valid.append(cve)
-
+    print("\nValid CVEs to take action immediately:\n")
     for cve in cves_valid:
         print(cve)
 
+    print("\nCVEs to track for incoming fix:\n")
+    for cve in cves_warning:
+        print(cve)
