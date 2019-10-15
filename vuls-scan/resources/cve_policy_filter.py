@@ -21,8 +21,8 @@ cves_report_old_list_file = "cves_report_old_list_file.txt"
 cves_report_old_full_file = "cves_report_old_full_file.txt"
 
 def get_new_cves(cve_ids,old_cve_ids):
+    new_cves_list = []
     new_cves = (list(set(cve_ids) - set(old_cve_ids)))
-    print("\nNew CVEs from last report:\n")
     for cve_id in new_cves:
         cve = {}
         cvss = float(get_cvss(cve_id,cves_report_list_file))
@@ -35,7 +35,8 @@ def get_new_cves(cve_ids,old_cve_ids):
         cve["au"] = au
         cve["ai"] = ai
         cve["status"] = cve_status
-        print(cve)
+        new_cves_list.append(cve)
+    return new_cves_list
 
 def get_position(token,lines):
     """
@@ -186,16 +187,25 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     cve_ids = get_cves_id(cves_report_list_file)
-    old_cve_ids = get_cves_id(cves_report_old_list_file)
-    get_new_cves(cve_ids,old_cve_ids)
+    #old_cve_ids = get_cves_id(cves_report_old_list_file)
+    #get_new_cves(cve_ids,old_cve_ids)
 
-    cves_warning_old = get_last_warning_cves()
-    print("\nCVEs that we had to track from last report\n")
-    for cve in cves_warning_old:
-        cve_id = (cve["id"].strip())
-        cve_status = get_cves_status(cve_id,cves_report_list_file)
-        if cve_status == "fixed":
-            print(cve)
+    #cves_warning_old = get_last_warning_cves()
+    #print("\nCVEs that we had to track from last report\n")
+    #for cve in cves_warning_old:
+    #    cve_id = (cve["id"].strip())
+    #    cve_status = get_cves_status(cve_id,cves_report_list_file)
+    #    if cve_status == "fixed":
+    #        cvss = float(get_cvss(cve_id,cves_report_list_file))
+    #        av,ac,au,ai = get_base_vector(cve_id,cves_report_full_file)
+    #        cve["id"] = cve_id
+    #        cve["cvss"] = cvss
+    #        cve["av"] = av
+    #        cve["ac"] = ac
+    #        cve["au"] = au
+    #        cve["ai"] = ai
+    #        cve["status"] = cve_status
+    #        print(cve)
 
     for cve_id in cve_ids:
         cve = {}
