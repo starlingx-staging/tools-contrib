@@ -8,6 +8,21 @@ cves_to_fix = []
 cves_to_track = []
 cves_w_errors = []
 
+def print_report():
+
+    print("\nValid CVEs to take action immediately: %d\n" % (len(cves_to_fix)))
+    for cve in cves_to_fix:
+        print(cve)
+
+    print("\nCVEs to track for incoming fix: %d \n" % (len(cves_to_track)))
+    for cve in cves_to_track:
+        print(cve)
+
+    print("\nERROR: CVEs that has no cvss2Score or cvss2Vector: %d \n" \
+        % (len(cves_w_errors)))
+    for cve in cves_w_errors:
+        print(cve)
+
 def get_position(token,lines):
     """
     Get the position to search for the token, like CVSS, in some reports it is
@@ -107,17 +122,8 @@ def main():
             else:
                 cves_to_track.append(cve)
 
-    print("\nValid CVEs to take action immediately:\n")
-    for cve in cves_to_fix:
-        print(cve)
+    print_report()
 
-    print("\nCVEs to track for incoming fix:\n")
-    for cve in cves_to_track:
-        print(cve)
-
-    print("\nERROR: CVEs that has no cvss2Score or cvss2Vector:\n")
-    for cve in cves_w_errors:
-        print(cve)
 
 if __name__ == "__main__":
     main()
