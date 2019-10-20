@@ -26,7 +26,6 @@ def print_html_report():
     html_file.write(outputText)
     html_file.close()
 
-
 def print_report():
 
     print("\nValid CVEs to take action immediately: %d\n" % (len(cves_to_fix)))
