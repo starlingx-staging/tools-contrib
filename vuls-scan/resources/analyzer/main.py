@@ -8,6 +8,25 @@ cves_to_fix = []
 cves_to_track = []
 cves_w_errors = []
 
+
+def print_html_report():
+
+    import jinja2
+
+    templateLoader = jinja2.FileSystemLoader(searchpath="./")
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    TEMPLATE_FILE = "template.txt"
+    template = templateEnv.get_template(TEMPLATE_FILE)
+    heads = ["cve_id","status","cvss2Score","av", "ac","au","ai"]
+    outputText = template.render(cves_to_fix = cves_to_fix,\
+        cves_to_track = cves_to_track,\
+        cves_w_errors = cves_w_errors,\
+        heads = heads)
+    html_file = open('report.html', 'w')
+    html_file.write(outputText)
+    html_file.close()
+
+
 def print_report():
 
     print("\nValid CVEs to take action immediately: %d\n" % (len(cves_to_fix)))
@@ -123,6 +142,7 @@ def main():
                 cves_to_track.append(cve)
 
     print_report()
+    print_html_report()
 
 
 if __name__ == "__main__":
