@@ -9,7 +9,7 @@ cves_to_track = []
 cves_w_errors = []
 
 
-def print_html_report():
+def print_html_report(title):
 
     import jinja2
 
@@ -21,7 +21,8 @@ def print_html_report():
     outputText = template.render(cves_to_fix = cves_to_fix,\
         cves_to_track = cves_to_track,\
         cves_w_errors = cves_w_errors,\
-        heads = heads)
+        heads = heads,\
+        title = title)
     html_file = open('report.html', 'w')
     html_file.write(outputText)
     html_file.close()
@@ -71,9 +72,9 @@ def get_cves_status(cve_id,lines):
 def main():
     data = {}
 
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print("\nERROR : Missing arguments, the expected arguments are:")
-        print("\n   %s <result.json>  <list.txt>\n" % (sys.argv[0]) )
+        print("\n   %s <result.json>  <list.txt> <title>\n" % (sys.argv[0]) )
         print("\n result.json = json file generated from: vuls report -format-json")
         print("\n list.txt = txt file generated from: vuls report -format-list")
         print("\n")
@@ -87,9 +88,10 @@ def main():
         results_list = sys.argv[2]
     else:
         sys.exit(0)
+    title = sys.argv[3]
 
     try:
-        with open('localhost.json') as json_file:
+        with open(results_json) as json_file:
             data = json.load(json_file)
     except ValueError as e:
         print(e)
@@ -101,9 +103,7 @@ def main():
 
     for cve in cves:
         cve_id = cve["id"]
-
-        filename = "list.txt"
-        with open(filename,'r') as fh:
+        with open(results_list,'r') as fh:
             lines = fh.readlines()
         cve_status = get_cves_status(cve_id,lines)
         cve["status"] = cve_status
@@ -141,7 +141,7 @@ def main():
                 cves_to_track.append(cve)
 
     print_report()
-    print_html_report()
+    print_html_report(title)
 
 
 if __name__ == "__main__":
