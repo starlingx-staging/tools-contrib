@@ -1,6 +1,6 @@
 <head></head>
 <body>
-    <h1>Security report from vuls scan</h1>
+    <h1>Security report from vuls scan from {{title}}</h1>
     <h2>Valid CVEs to take action immediately: {{cves_to_fix | length}}</h2>
 	<table>
 		{% if cves_to_fix|length > 1 %}
