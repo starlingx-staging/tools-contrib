@@ -9,6 +9,14 @@ cves_to_track = []
 cves_w_errors = []
 
 
+def chec_nvd_link(url):
+    import requests
+    request = requests.get(url)
+    if request.status_code == 200:
+        return True
+    else:
+        return False
+
 def print_html_report(title):
 
     import jinja2
@@ -29,13 +37,29 @@ def print_html_report(title):
 
 def print_report():
 
+    nvd_link = "https://nvd.nist.gov/vuln/detail/"
     print("\nValid CVEs to take action immediately: %d\n" % (len(cves_to_fix)))
     for cve in cves_to_fix:
-        print(cve)
+        print("\n")
+        print(cve["id"])
+        print("status : " + cve["status"])
+        print("Attack Vector: " + cve["av"])
+        print("Access Complexity : " + cve["ac"])
+        print("Autentication: " + cve["au"])
+        print("Availability Impact :" + cve["ai"])
+        print("Affected packages:")
+        print(cve["affectedpackages"])
+        print(cve["summary"])
+        if chec_nvd_link(nvd_link + cve["id"]):
+            print(nvd_link + cve["id"])
 
     print("\nCVEs to track for incoming fix: %d \n" % (len(cves_to_track)))
     for cve in cves_to_track:
-        print(cve)
+        cve_line = []
+        for key, value in cve.items():
+            if key != "summary":
+                cve_line.append(key + ":" + str(value))
+        print(cve_line)
 
     print("\nERROR: CVEs that has no cvss2Score or cvss2Vector: %d \n" \
         % (len(cves_w_errors)))
@@ -103,6 +127,8 @@ def main():
 
     for cve in cves:
         cve_id = cve["id"]
+        affectedpackages_list = []
+
         with open(results_list,'r') as fh:
             lines = fh.readlines()
         cve_status = get_cves_status(cve_id,lines)
@@ -110,6 +136,9 @@ def main():
         try:
             nvd2_score = data["scannedCves"][cve_id]["cveContents"]["nvd"]["cvss2Score"]
             cvss2vector  = data["scannedCves"][cve_id]["cveContents"]["nvd"]["cvss2Vector"]
+            summary = data["scannedCves"][cve_id]["cveContents"]["nvd"]["summary"]
+            affectedpackages = data["scannedCves"][cve_id]["affectedPackages"]
+
         except:
             cves_w_errors.append(cve)
         else:
@@ -127,6 +156,10 @@ def main():
             cve["ac"] = str(ac)
             cve["au"] = str(au)
             cve["ai"] = str(ai)
+            cve["summary"] = str(summary)
+            for pkg in affectedpackages:
+                affectedpackages_list.append(pkg["name"])
+            cve["affectedpackages"] = affectedpackages_list
             cves_valid.append(cve)
 
     for cve in cves_valid:
