@@ -56,8 +56,8 @@ def print_report():
         print("Affected packages:")
         print(cve["affectedpackages"])
         print(cve["summary"])
-        if chec_nvd_link(nvd_link + cve["id"]):
-            print(nvd_link + cve["id"])
+        #if chec_nvd_link(nvd_link + cve["id"]):
+        #    print(nvd_link + cve["id"])
 
     print("\nCVEs to track for incoming fix: %d \n" % (len(cves_to_track)))
     for cve in cves_to_track:
@@ -72,41 +72,14 @@ def print_report():
     for cve in cves_w_errors:
         print(cve)
 
-def get_position(token,lines):
-    """
-    Get the position to search for the token, like CVSS, in some reports it is
-    in column 4th and in some others in 2nd column
-    """
-    for line in lines:
-        line = line.strip()
-        if "CVE-ID" in line and "CVSS" in line:
-            elements = (line.split("|"))
-            count = 0
-            for element in elements:
-                if token in element.strip():
-                    return count
-                count +=1
-
-def get_cves_status(cve_id,lines):
-    """
-    Get the CVEs status: fixed/unfixed
-    :return cve_status
-    """
-    pos = get_position("FIXED",lines)
-    for line in lines:
-        if "CVE" in line and not "CVE-ID" in line:
-            if cve_id in line:
-                cve_status = line.strip().split("|")[pos].strip()
-                return cve_status
 
 def main():
     data = {}
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print("\nERROR : Missing arguments, the expected arguments are:")
-        print("\n   %s <result.json>  <list.txt> <title>\n" % (sys.argv[0]) )
+        print("\n   %s <result.json> <title>\n" % (sys.argv[0]) )
         print("\n result.json = json file generated from: vuls report -format-json")
-        print("\n list.txt = txt file generated from: vuls report -format-list")
         print("\n")
         sys.exit(0)
 
@@ -114,11 +87,8 @@ def main():
         results_json = sys.argv[1]
     else:
         sys.exit(0)
-    if os.path.isfile(sys.argv[2]):
-        results_list = sys.argv[2]
-    else:
-        sys.exit(0)
-    title = sys.argv[3]
+
+    title = sys.argv[2]
 
     try:
         with open(results_json) as json_file:
@@ -134,11 +104,8 @@ def main():
     for cve in cves:
         cve_id = cve["id"]
         affectedpackages_list = []
+        status_list = []
 
-        with open(results_list,'r') as fh:
-            lines = fh.readlines()
-        cve_status = get_cves_status(cve_id,lines)
-        cve["status"] = cve_status
         try:
             nvd2_score = data["scannedCves"][cve_id]["cveContents"]["nvd"]["cvss2Score"]
             cvss2vector  = data["scannedCves"][cve_id]["cveContents"]["nvd"]["cvss2Vector"]
@@ -165,7 +132,12 @@ def main():
             cve["summary"] = str(summary)
             for pkg in affectedpackages:
                 affectedpackages_list.append(pkg["name"])
+                status_list.append(pkg["notFixedYet"])
             cve["affectedpackages"] = affectedpackages_list
+            if True in status_list:
+                cve["status"] = "unfixed"
+            else:
+                cve["status"] = "fixed"
             cves_valid.append(cve)
 
     for cve in cves_valid:
