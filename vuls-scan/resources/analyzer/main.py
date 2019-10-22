@@ -11,11 +11,16 @@ cves_w_errors = []
 
 def chec_nvd_link(url):
     import requests
-    request = requests.get(url)
-    if request.status_code == 200:
-        return True
+    try:
+        request = requests.get(url)
+    except:
+        print("No internet conection")
+        sys.exit(-1)
     else:
-        return False
+        if request.status_code == 200:
+            return True
+        else:
+            return False
 
 def print_html_report(title):
 
@@ -43,6 +48,7 @@ def print_report():
         print("\n")
         print(cve["id"])
         print("status : " + cve["status"])
+        print("cvss2Score : " + str(cve["cvss2Score"]))
         print("Attack Vector: " + cve["av"])
         print("Access Complexity : " + cve["ac"])
         print("Autentication: " + cve["au"])
@@ -175,7 +181,6 @@ def main():
 
     print_report()
     print_html_report(title)
-
 
 if __name__ == "__main__":
     main()
