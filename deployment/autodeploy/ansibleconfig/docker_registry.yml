@@ -1,0 +1,6 @@
+
+docker_registries:
+  defaults:
+    url: DOCKER_REGISTRY_TO_SET
+    secure: False
+

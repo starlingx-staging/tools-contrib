@@ -1,0 +1,22 @@
+port=53
+expand-hosts
+domain=example.com
+
+listen-address=127.0.0.1,10.10.10.1
+dhcp-range=10.10.10.11,10.10.10.99,8000h
+dhcp-option=option:router,10.10.10.1
+dhcp-option=option:ntp-server,10.10.10.1
+dhcp-option=option:dns-server,10.10.10.1
+dhcp-option=option:netmask,255.255.255.0
+
+# Test for the architecture of a netboot client. PXE clients are
+# supposed to send their architecture as option 93. (See RFC 4578)
+dhcp-match=x86PC, option:client-arch, 0 #BIOS x86
+dhcp-match=BC_EFI, option:client-arch, 7 #EFI x86-64
+
+# Set boot file name only when tag is "bios" or "uefi"
+dhcp-boot=tag:x86PC,pxelinux.0  # for Legacy BIOS detected by dhcp-match above
+dhcp-boot=tag:BC_EFI,EFI/grubx64.efi # for UEFI arch detected by dhcp-match above
+
+enable-tftp
+tftp-root=/localdisk/tftpboot

@@ -1,0 +1,47 @@
+{
+  "name": "ws_123",
+  "hw_type": "workstation",
+
+  "bmc_ip": "10.10.10.123",
+  "bmc_port": "623",
+  "bmc_user": "admin",
+  "bmc_pwd": "admin123",
+
+  "force_pxe_for_first_boot": 1,
+
+  "floating_ip": "10.10.10.23",
+  "floating_ipv6": "",
+
+  "boot_device": "/dev/sda",
+  "rootfs_device": "/dev/sda",
+
+  "num_of_nic": 3,
+  "network": {
+    "default": {
+      "name": "enp2s0",
+      "mac": "a0:36:9f:c8:9b:8d",
+      "brname": "virbr1",
+      "ip": "10.10.10.173",
+      "ipv6": "",
+      "type": "oam"
+    },
+    "1": {
+      "name": "eno1",
+      "mac": "a4:bf:01:2b:41:5e",
+      "brname": "virbr2",
+      "ip": "",
+      "ipv6": "",
+      "type": ""
+    },
+    "2": {
+      "name": "eno2",
+      "brname": "virbr3",
+      "mac": "a4:bf:01:2b:41:5f",
+      "ip": "",
+      "ipv6": "",
+      "type": ""
+    }
+  },
+
+  "=== END OF CONFIG ====": 0
+}

@@ -1,0 +1,17 @@
+---
+system_mode: duplex
+
+management_subnet: MGMT_SUBNET_TO_SET
+management_start_address: MGMT_DHCP_START_IP_TO_SET
+management_end_address: MGMT_DHCP_END_IP_TO_SET
+
+external_oam_subnet: OAM_SUBNET_TO_SET
+external_oam_gateway_address: GATEWAY_TO_SET
+external_oam_floating_address: CONTROLLER_FLOATING_TO_SET
+external_oam_node_0_address: CONTROLLER0_OAM_TO_SET
+external_oam_node_1_address: CONTROLLER1_OAM_TO_SET
+
+admin_username: admin
+admin_password: ADMIN_PASSWORD_TO_SET
+
+

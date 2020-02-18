@@ -1,0 +1,26 @@
+{
+  "dns_server": "y",
+  "docker_proxy": "y",
+  "docker_registry": "y",
+
+  "ntp_server": "\"your.ntp.server.com\"",
+
+  "ansible_config": {
+
+    "MGMT_SUBNET_TO_SET": "192.188.204.0/24",
+    "MGMT_DHCP_START_IP_TO_SET": "192.188.204.2",
+    "MGMT_DHCP_END_IP_TO_SET": "192.188.204.50",
+
+    "OAM_SUBNET_TO_SET": "192.192.192.0/24",
+    "GATEWAY_TO_SET": "192.192.192.1",
+    "CONTROLLER_FLOATING_TO_SET": "192.192.192.2",
+    "CONTROLLER0_OAM_TO_SET": "192.192.192.3",
+    "CONTROLLER1_OAM_TO_SET": "192.192.192.4",
+
+    "DNS_SERVER_TO_SET": "192.192.192.1",
+    "DOCKER_REGISTRY_TO_SET": "your.registry.server.com",
+    "DOCKER_PROXY_HTTP_TO_SET": "http://your.http.proxy.com",
+    "DOCKER_PROXY_HTTPS_TO_SET": "http://your.https.proxy.com"
+  },
+  "=== END OF CONFIG ====": 0
+}

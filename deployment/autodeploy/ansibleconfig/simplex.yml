@@ -1,0 +1,11 @@
+---
+system_mode: simplex
+
+external_oam_subnet: OAM_SUBNET_TO_SET
+external_oam_gateway_address: GATEWAY_TO_SET
+external_oam_floating_address: CONTROLLER0_OAM_TO_SET
+
+admin_username: admin
+admin_password: ADMIN_PASSWORD_TO_SET
+
+

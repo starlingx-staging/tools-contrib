@@ -2,6 +2,7 @@
 *DeploymentTest*
 *.swp
 *.img
+*.qcow2
 *.iso
 *.rpm
 *.tgz

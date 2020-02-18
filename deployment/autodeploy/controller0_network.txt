@@ -1,10 +1,13 @@
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-ens6
-IPADDR=INIT_IP_TO_SET
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-OAM_NIC_TO_SET
+IPADDR=CONTROLLER0_OAM_TO_SET
 NETMASK=255.255.255.0
 BOOTPROTO=static
-DEVICE=ens6
+DEVICE=OAM_NIC_TO_SET
 MTU=1500
-GATEWAY=10.10.10.1
+GATEWAY=GATEWAY_TO_SET
 ONBOOT=yes
 EOF
 
+cat << EOF > /etc/sysconfig/network-scripts/route-OAM_NIC_TO_SET
+GATEWAY_TO_SET via CONTROLLER0_OAM_TO_SET dev OAM_NIC_TO_SET
+EOF
