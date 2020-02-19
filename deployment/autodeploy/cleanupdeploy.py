@@ -6,77 +6,75 @@ import shutil
 from subprocess import *
 
 import ectest.log as LOG
-
-DEBUG = True
+import ectest.cmd as CMD
 
 CurrPath = os.path.join(os.path.abspath(os.getcwd()))
 
 #########################
 ##Structure the Arg Parser
-desc = "StarlingX Auto Deployment - Cleanup"
-parser = argparse.ArgumentParser(description=desc, version='%(prog)s 1.0')
-parser.add_argument('virtimg_dir',
-    help="Dir to place kvm images for controllers and computes.",
-    type=str)
+desc = "EC Auto Deployment - Cleanup"
+parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('--vmname',
     help="Delete a specific vm.",
     type=str)
-parser.add_argument('--method',
-    help="Create KVM or VirtualBox for deployment test.",
+parser.add_argument('--delete_all',
+    help="Undefine the vms and delete the disk images.",
+    action="store_true")
+
+parser.add_argument('--brname',
+    help="OAM bridge name.",
     type=str,
-    choices=["kvm"], # removed "vbox" because vbox is not available now.
-    default="kvm")
+    default='virbr1')
 
 args = parser.parse_args()
 
-def iskvm():
-    return args.method == "kvm"
-def isvbox():
-    return args.method == "vbox"
-if isvbox():
-    LOG.Info("!!! WARNING !!!: vbox is not tested in this version of script.")
+def is_on_the_bridge(domID, brname):
+    rv, brlist =  CMD.shell("sudo virsh domiflist %s | grep bridge | awk '{print $3;}'" % domID)
+    if brname in brlist:
+        return True
+    return False
 
+vmlist = []
+vmlist_d = []
+if args.vmname:
+    cmd = "sudo virsh list --all | grep %s | awk '{print $2}'" % args.vmname
+    retval, vmlist = CMD.shell(cmd)
+else:
+    cmd = "sudo virsh list --all | grep running | awk '{print $2}'"
+    retval, vmlist = CMD.shell(cmd)
+    cmd = "sudo virsh list --all | grep -v running | grep -v Name | awk '{print $2}'"
+    retval, vmlist_d = CMD.shell(cmd)
+    while '' in vmlist_d:
+        vmlist_d.remove('')
 
-def cmdhost(cmd, cwd=None, logfile=None, silent=False):
-    realcmd = cmd
-    result = ""
-    retval = 0
-
-    if cwd != None:
-        os.chdir(cwd)
-    try:
-        result = check_output(realcmd, shell = True).splitlines()
-    except CalledProcessError as ecp:
-        LOG.Error("ERROR: failed to run \"%s\": returned %s %s" % (cmd, ecp.returncode, ecp.output))
-        retval = ecp.returncode
-    except Exception, error:
-        LOG.Error("ERROR: failed to run \"%s\": %s" % (cmd, error))
-        LOG.Error("")
-        retval = -1
-
-    LOG.Info("Finished \"%s\": %s" % (cmd, result), silent=silent)
-    LOG.Info("", silent=silent)
-    return retval, result
-
-if iskvm():
-    vmlist = []
-    if args.vmname:
-        vmlist.append(args.vmname)
-    else:
-        cmd = "sudo virsh list | grep running | awk '{print $2}'"
-        retval, vmlist = cmdhost(cmd)
-
-    for r in vmlist:
+for r in vmlist:
+    if is_on_the_bridge(r, args.brname):
         LOG.Info("===========================")
         LOG.Info("Destroying : %s" % r)
         cmds = []
+        # Only destroy the vms here
         cmds.append("sudo virsh destroy %s || true" % r)
-        # cmds.append("sudo virsh undefine %s || true" % r)
-        # cmds.append("sudo rm -rf %s/%s-0.img || true" % (args.virtimg_dir, r))
-        # cmds.append("sudo rm -rf %s/%s-1.img || true" % (args.virtimg_dir, r))
-        rv, rs = cmdhost(";".join(cmds))
+        rv, rs = CMD.shell(";".join(cmds))
         LOG.Info("Return Value: %s" % str(rv))
         for rl in rs:
             LOG.Info(rl)
+
+if args.delete_all:
+    LOG.Info("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    LOG.Info("Vms will be perminantly deleted.")
+    for r in vmlist + vmlist_d:
+        if is_on_the_bridge(r, args.brname):
+            LOG.Info("===========================")
+            LOG.Info("Deleting : %s" % r)
+            cmd = "sudo virsh dumpxml %s | grep \"source file\" | grep -v \"iso\" | awk -F \"'\" '{print $2;}'" % r
+            retval, imglist = CMD.shell(cmd)
+            cmds = []
+            cmds.append("sudo virsh undefine %s || true" % r)
+            for f in imglist:
+                cmds.append("sudo rm -rf %s || true" % f)
+            rv, rs = CMD.shell(";".join(cmds))
+            LOG.Info("Return Value: %s" % str(rv))
+            for rl in rs:
+                LOG.Info(rl)
 
 

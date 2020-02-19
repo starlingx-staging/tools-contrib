@@ -1,0 +1,57 @@
+{
+  "name": "blade_104",
+  "hw_type": "blade_server",
+
+  "bmc_ip": "10.10.10.104",
+  "bmc_port": "623",
+  "bmc_user": "admin",
+  "bmc_pwd": "admin123",
+
+  "force_pxe_for_first_boot": 1,
+
+  "floating_ip": "10.10.10.4",
+  "floating_ipv6": "",
+
+  "boot_device": "/dev/sda",
+  "rootfs_device": "/dev/sda",
+
+  "num_of_nic": 4,
+  "network": {
+    "default": {
+      "name": "eno1",
+      "mac": "a4:bf:01:51:39:b3",
+      "ip": "10.10.10.154",
+      "brname": "virbr1",
+      "ipv6": "",
+      "type": "oam"
+    },
+    "2": {
+      "name": "eno2",
+      "mac": "a4:bf:01:51:39:b4",
+      "ip": "",
+      "brname": "virbr2",
+      "ipv6": "",
+      "type": "mgmt"
+    },
+    "3": {
+      "name": "enp134s0f0",
+      "mac": "3c:fd:fe:cc:80:34",
+      "brname": "virbr3",
+      "ip": "",
+      "ipv6": "",
+      "type": ""
+    },
+    "4": {
+      "name": "enp134s0f1",
+      "mac": "3c:fd:fe:cc:80:35",
+      "brname": "virbr4",
+      "ip": "",
+      "ipv6": "",
+      "type": ""
+    }
+  },
+
+  "=== END OF CONFIG ====": 0
+}
+
+

@@ -1,0 +1,11 @@
+{
+  "=== NO_NEED_TO_MODIFY CONFIG ====": 0,
+
+  "tftp_dir": "/var/lib/tftpboot/uefi",
+  "mnt_point": "/mnt",
+  "http_server": "10.10.10.1",
+  "http_root": "/var/www/html",
+  "prj_name": "stx",
+
+  "=== END OF CONFIG ====": 0
+}

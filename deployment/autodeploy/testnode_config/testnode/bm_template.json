@@ -1,0 +1,42 @@
+{
+  "name": "name_for_the_test_node",
+  "hw_type": "blade_server",
+
+  "bmc_ip": "10.10.10.103",
+  "bmc_port": "623",
+  "bmc_user": "admin",
+  "bmc_pwd": "admin123",
+
+  "force_pxe_for_first_boot": 1,
+
+  "boot_device": "/dev/sda",
+  "rootfs_device": "/dev/sda",
+
+  "num_of_nic": 4,
+  "network": {
+    "default": {
+      "name": "enp65s0f0",
+      "brname": "virbr1",
+      "type": "oam"
+    },
+    "2": {
+      "name": "eno2",
+      "brname": "virbr2",
+      "type": "mgmt"
+    },
+    "3": {
+      "name": "enp134s0f0",
+      "brname": "virbr3",
+      "type": ""
+    },
+    "4": {
+      "name": "enp134s0f1",
+      "brname": "virbr4",
+      "type": ""
+    }
+  },
+
+  "=== END OF CONFIG ====": 0
+}
+
+

@@ -1,0 +1,55 @@
+{
+  "name": "vm_template",
+  "hw_type": "vm",
+
+  "bmc_ip": "",
+  "bmc_port": "",
+  "bmc_user": "",
+  "bmc_pwd": "",
+
+  "force_pxe_for_first_boot": 0,
+
+  "floating_ip": "",
+  "floating_ipv6": "",
+
+  "boot_device": "/dev/sda",
+  "rootfs_device": "/dev/sda",
+
+  "num_of_nic": 4,
+  "network": {
+    "default": {
+      "name": "ens6",
+      "brname": "virbr1",
+      "mac": "",
+      "ip": "10.10.10.3",
+      "ipv6": "",
+      "type": "oam"
+    },
+    "mgmt": {
+      "name": "ens7",
+      "brname": "virbr2",
+      "mac": "",
+      "ip": "",
+      "ipv6": "",
+      "type": "mgmt"
+    },
+    "data0": {
+      "name": "eth1000",
+      "brname": "virbr3",
+      "mac": "",
+      "ip": "",
+      "ipv6": "",
+      "type": "data"
+    },
+    "data1": {
+      "name": "eth1001",
+      "brname": "virbr4",
+      "mac": "",
+      "ip": "",
+      "ipv6": "",
+      "type": "data"
+    }
+  },
+
+  "=== END OF CONFIG ====": 0
+}

@@ -1,0 +1,81 @@
+{
+  "=== GENERAL CONFIG ====": 0,
+
+  "system_mode": "simplex",
+  "method": "kvm",
+
+  "dns_server": "n",
+  "docker_proxy": "n",
+  "docker_registry": "n",
+
+  "ntp_server": "\"0.pool.ntp.org,1.pool.ntp.org\"",
+
+  "ansible_config": {
+    "MGMT_SUBNET_TO_SET": "192.178.204.0/24",
+    "MGMT_DHCP_START_IP_TO_SET": "192.178.204.2",
+    "MGMT_DHCP_END_IP_TO_SET": "192.178.204.50",
+
+    "OAM_SUBNET_TO_SET": "10.10.10.0/24",
+    "GATEWAY_TO_SET": "10.10.10.1",
+    "CONTROLLER_FLOATING_TO_SET": "10.10.10.2",
+    "CONTROLLER0_OAM_TO_SET": "10.10.10.3",
+    "CONTROLLER1_OAM_TO_SET": "10.10.10.4",
+
+    "DNS_SERVER_TO_SET": "",
+    "DOCKER_REGISTRY_TO_SET": "",
+    "DOCKER_PROXY_HTTP_TO_SET": "",
+    "DOCKER_PROXY_HTTPS_TO_SET": "",
+
+    "ADMIN_PASSWORD_TO_SET": "Local.123"
+  },
+
+  "=== CONFIG for VM DEPLOYMENT ====": 0,
+
+  "vm_img_location": "/var/lib/libvirt/images",
+  "vm_prefix_name": "ctn",
+  "compute_num": 0,
+  "storage_num": 0,
+  "vm_bridge": {
+    "virbr1": "virbr1",
+    "virbr2": "virbr2",
+    "virbr3": "virbr3",
+    "virbr4": "virbr4"
+  },
+
+  "controller_config": {
+    "cpus": "6",
+    "disk1_gib": "400",
+    "disk2_gib": "30",
+    "disk3_gib": "0",
+    "mem_gib": "30"
+  },
+  "worker_config": {
+    "cpus": "4",
+    "disk1_gib": "200",
+    "disk2_gib": "30",
+    "disk3_gib": "0",
+    "mem_gib": "16"
+  },
+  "storage_config": {
+    "cpus": "4",
+    "disk1_gib": "300",
+    "disk2_gib": "100",
+    "disk3_gib": "100",
+    "mem_gib": "16"
+  },
+
+  "=== CONFIG for BM DEPLOYMENT ====": 0,
+
+  "bm_controller0": "",
+  "bm_controller1": "",
+  "bm_srotage_nodes": [],
+  "bm_worker_nodes": [],
+
+  "=== NO_NEED_TO_MODIFY CONFIG ====": 0,
+
+  "provision_script": "ctn_provisioning",
+  "username": "sysadmin",
+  "openstack_root": "openstack_helm",
+
+  "=== END OF CONFIG ====": 0
+}
