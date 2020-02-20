@@ -1,5 +1,3 @@
 
 docker_http_proxy: DOCKER_PROXY_HTTP_TO_SET
 docker_https_proxy: DOCKER_PROXY_HTTPS_TO_SET
-docker_no_proxy:
-  - DOCKER_REGISTRY_TO_SET
