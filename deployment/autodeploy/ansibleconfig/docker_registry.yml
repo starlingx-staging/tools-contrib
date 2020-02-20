@@ -1,4 +1,7 @@
 
+docker_no_proxy:
+  - DOCKER_REGISTRY_TO_SET
+
 docker_registries:
   defaults:
     url: DOCKER_REGISTRY_TO_SET
